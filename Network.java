@@ -30,6 +30,7 @@ public class Network {
      *  If there is no such user, returns null.
      *  Notice that the method receives a String, and returns a User object. */
     public User getUser(String name) {
+        if (name == null) return null;
         for (int i = 0; i< userCount; i++){
             if (name.equals(users[i].getName())){
                  return users[i];
@@ -64,46 +65,64 @@ public class Network {
         if (getUser(name2) == null) {
         return false;
         }
+        if (name1.equals(name2)) return false;
      User u1 = getUser(name1);
+     User u2 = getUser(name2);
+     if (u1 == null || u2 == null) return false;
      return u1.addFollowee(name2);
     }
     
     /** For the user with the given name, recommends another user to follow. The recommended user is
      *  the user that has the maximal mutual number of followees as the user with the given name. */
     public String recommendWhoToFollow(String name) {
-    int bestScore = 0;
-    int score = 0;
-    User mostRecommendedUserToFollow = null;
-    User u3 = getUser(name);
-    for (int i = 0; i<userCount; i++){
-        User candidate = users [i];
-         if ((candidate.getName()).equals(name)){ continue;}
-        score = (u3.countMutual(candidate));
-        if (score >= bestScore){
+    User u = getUser(name);
+    if (u == null) return null;
+
+    int bestScore = -1;
+    User best = null;
+
+    for (int i = 0; i < userCount; i++) {
+        User candidate = users[i];
+
+    
+        if (candidate.getName().equals(name)) continue;
+
+       
+        if (u.follows(candidate.getName())) continue;
+
+        int score = u.countMutual(candidate);
+
+       
+        if (score > bestScore) {
             bestScore = score;
-            mostRecommendedUserToFollow = candidate;
+            best = candidate;
         }
     }
-    return mostRecommendedUserToFollow.getName();
-    }
-    
+
+    return (best == null) ? null : best.getName();
+}
+
 
     /** Computes and returns the name of the most popular user in this network: 
      *  The user who appears the most in the follow lists of all the users. */
     public String mostPopularUser() {
-        int score = 0;
-        int bestScore = 0;
-        User mostPopular = null;
-         for (int i = 0; i<userCount; i++){
-         User candidate = users [i];
-         score = followeeCount(candidate.getName());
-         if (score >= bestScore){
-            bestScore =score;
-            mostPopular = candidate;
-         }
-         }  
-         return mostPopular.getName(); 
+    if (userCount == 0) return null;
+
+    int bestScore = -1;
+    User best = null;
+
+    for (int i = 0; i < userCount; i++) {
+        User candidate = users[i];
+        int score = followeeCount(candidate.getName());
+        if (score > bestScore) {
+            bestScore = score;
+            best = candidate;
+        }
     }
+
+    return (best == null) ? null : best.getName();
+}
+
 
     /** Returns the number of times that the given name appears in the follows lists of all
      *  the users in this network. Note: A name can appear 0 or 1 times in each list. */
